@@ -71,6 +71,7 @@ export default function AccountScreen() {
             onChangeText={setContrasena}
             secureTextEntry
             autoCapitalize="none"
+            selectionColor="#fff"
           />
           <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <Text style={styles.buttonText}>Entrar</Text>
