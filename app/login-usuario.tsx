@@ -62,16 +62,17 @@ export default function AccountScreen() {
             onChangeText={setUsuario}
             autoCapitalize="none"
             keyboardType="email-address"
+            selectionColor="#fff"
           />
           <TextInput
             style={styles.input}
             placeholder="Contraseña"
-            placeholderTextColor="#070606ff"
+            placeholderTextColor="#bbb"
             value={contrasena}
             onChangeText={setContrasena}
             secureTextEntry
             autoCapitalize="none"
-            selectionColor="#0c0b0bff"
+            selectionColor="#fff"
           />
           <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <Text style={styles.buttonText}>Entrar</Text>
@@ -96,7 +97,7 @@ const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 350,
     alignItems: "center",
-    gap: 12,
+    // `gap` is not supported in RN StyleSheet; use margins on children instead
   },
   title: {
     fontSize: 22,
@@ -108,7 +109,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#333",
     backgroundColor: "#222",
-    color: "#0c0c0cff",
+    color: "#fff",
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
