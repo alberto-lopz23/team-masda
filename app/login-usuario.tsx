@@ -66,12 +66,12 @@ export default function AccountScreen() {
           <TextInput
             style={styles.input}
             placeholder="Contraseña"
-            placeholderTextColor="#bbb"
+            placeholderTextColor="#070606ff"
             value={contrasena}
             onChangeText={setContrasena}
             secureTextEntry
             autoCapitalize="none"
-            selectionColor="#fff"
+            selectionColor="#0c0b0bff"
           />
           <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <Text style={styles.buttonText}>Entrar</Text>
