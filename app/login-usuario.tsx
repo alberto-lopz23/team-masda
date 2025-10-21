@@ -57,17 +57,17 @@ export default function AccountScreen() {
           <TextInput
             style={styles.input}
             placeholder="Correo electrónico"
-            placeholderTextColor="#bbb"
+            placeholderTextColor="#131212ff"
             value={usuario}
             onChangeText={setUsuario}
             autoCapitalize="none"
             keyboardType="email-address"
-            selectionColor="#fff"
+            selectionColor="#000000ff"
           />
           <TextInput
             style={styles.input}
             placeholder="Contraseña"
-            placeholderTextColor="#bbb"
+            placeholderTextColor="#0c0b0bff"
             value={contrasena}
             onChangeText={setContrasena}
             secureTextEntry
