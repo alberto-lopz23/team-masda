@@ -411,7 +411,7 @@ export default function AdmindScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Admin</Text>
-
+    
       <View style={styles.tabRow}>
         <TouchableOpacity
           style={[styles.tab, activeTab === "locales" && styles.tabActive]}

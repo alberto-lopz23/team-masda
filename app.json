@@ -19,7 +19,8 @@
         "monochromeImage": "./assets/images/fondoAndroid.jpeg"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anerto.teammasdaevolution"
     },
     "web": {
       "output": "static",
@@ -44,6 +45,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f561d161-2a29-4ddb-9587-4cee4ab244ab"
+      }
     }
   }
 }

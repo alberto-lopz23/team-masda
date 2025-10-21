@@ -107,12 +107,15 @@ export default function PerfilLocalScreen() {
             getDoc(doc(db, "usuarios", String(it.userDocId)))
           )
         );
-        visitantesLista = visitantesLista.map((it, i) => ({
-          ...(it as any),
-          visitado: docs[i]?.exists()
-            ? (docs[i].data() as any).visitado ?? false
-            : false,
-        }));
+        visitantesLista = visitantesLista.map((it, i) => {
+          const data = docs[i]?.exists() ? (docs[i].data() as any) : {};
+          return {
+            ...(it as any),
+            visitado: data?.visitado ?? false,
+            // prefer numeroID stored on user document, fallback to userDocId
+            numeroID: data?.numeroID ?? data?.id ?? String(it.userDocId),
+          };
+        });
       } catch (e) {
         console.error("Error fetching usuarios visitado flags:", e);
       }
@@ -180,7 +183,9 @@ export default function PerfilLocalScreen() {
         {visitantes.length > 0 ? (
           visitantes
             .filter((v) =>
-              (v.nombre ?? "").toLowerCase().includes(searchTerm.toLowerCase())
+              ((v.nombre ?? "") + " " + ((v as any).numeroID ?? ""))
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase())
             )
             .map((v, idx) => (
               <View key={v.userDocId ?? idx} style={styles.cardVisitor}>
@@ -195,6 +200,9 @@ export default function PerfilLocalScreen() {
                 <View style={{ flex: 1 }}>
                   <Text style={styles.visitorName}>
                     {v.nombre ?? "Sin nombre"}
+                  </Text>
+                  <Text style={[styles.visitorDate, { color: "#bbb" }]}>
+                    ID: {(v as any).numeroID ?? v.userDocId}
                   </Text>
                   <Text style={styles.visitorDate}>
                     {v.lastVisit ? v.lastVisit.toLocaleString() : "—"}
