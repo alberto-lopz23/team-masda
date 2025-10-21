@@ -57,6 +57,7 @@ export default function AccountScreen() {
           <TextInput
             style={styles.input}
             placeholder="Correo electrónico"
+            placeholderTextColor="#bbb"
             value={usuario}
             onChangeText={setUsuario}
             autoCapitalize="none"
@@ -65,6 +66,7 @@ export default function AccountScreen() {
           <TextInput
             style={styles.input}
             placeholder="Contraseña"
+            placeholderTextColor="#bbb"
             value={contrasena}
             onChangeText={setContrasena}
             secureTextEntry
@@ -86,7 +88,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "#111",
     padding: 20,
   },
   form: {
@@ -103,7 +105,9 @@ const styles = StyleSheet.create({
   input: {
     width: "100%",
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#333",
+    backgroundColor: "#222",
+    color: "#fff",
     borderRadius: 8,
     padding: 12,
     fontSize: 16,

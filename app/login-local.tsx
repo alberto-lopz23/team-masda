@@ -43,7 +43,7 @@ export default function LoginLocalScreen() {
       <TextInput
         style={styles.input}
         placeholder="Correo"
-        placeholderTextColor="#888"
+        placeholderTextColor="#bbb"
         autoCapitalize="none"
         value={correo}
         onChangeText={setCorreo}
@@ -52,7 +52,7 @@ export default function LoginLocalScreen() {
       <TextInput
         style={styles.input}
         placeholder="Contraseña"
-        placeholderTextColor="#888"
+        placeholderTextColor="#bbb"
         secureTextEntry
         value={contrasena}
         onChangeText={setContrasena}
@@ -86,7 +86,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   input: {
-    backgroundColor: "#fff",
+    backgroundColor: "#222",
+    color: "#fff",
     borderRadius: 10,
     padding: 12,
     fontSize: 16,
