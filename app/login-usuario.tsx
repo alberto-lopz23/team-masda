@@ -1,5 +1,6 @@
 import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import {
   Alert,
@@ -9,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { auth } from "../firebaseConfig";
+import { auth, db } from "../firebaseConfig";
 
 export default function AccountScreen() {
   const [usuario, setUsuario] = useState("");
@@ -22,15 +23,22 @@ export default function AccountScreen() {
   const handleLogin = async () => {
     if (usuario && contrasena) {
       try {
-        await signInWithEmailAndPassword(auth, usuario, contrasena);
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          usuario,
+          contrasena
+        );
         setRegistrado(true);
-        // si el correo (parte local antes de @) es 'roddy2105', redirigimos al admin
-        const localPart = (usuario || "").split("@")[0].toLowerCase();
-        if (localPart === "roddy2105") {
-          router.replace("/admind");
-          return;
+        // El admin se detecta por el campo `rol: "admin"` en usuarios/{uid}
+        const uid = userCredential.user.uid;
+        let esAdmin = false;
+        try {
+          const snap = await getDoc(doc(db, "usuarios", uid));
+          esAdmin = snap.exists() && snap.data()?.rol === "admin";
+        } catch (e) {
+          console.error("Error verificando rol:", e);
         }
-        router.replace("/home");
+        router.replace(esAdmin ? "/admind" : "/home");
       } catch (error: any) {
         if (
           error.code === "auth/user-not-found" ||
@@ -39,6 +47,8 @@ export default function AccountScreen() {
           Alert.alert("Error", "Usuario o contraseña incorrectos.");
         } else if (error.code === "auth/invalid-email") {
           Alert.alert("Error", "El correo electrónico no es válido.");
+        } else if (error.code === "auth/too-many-requests") {
+          Alert.alert("Error", "Demasiados intentos. Intenta más tarde.");
         } else {
           Alert.alert(
             "Error",

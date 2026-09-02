@@ -36,7 +36,7 @@ export default function PerfilLocalScreen() {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) setLocales(docSnap.data());
         else setLocales(null);
-      } catch (err) {
+      } catch {
         setLocales(null);
       }
     })();

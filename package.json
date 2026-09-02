@@ -17,6 +17,7 @@
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
     "expo": "~54.0.9",
+    "expo-camera": "~17.0.10",
     "expo-constants": "~18.0.9",
     "expo-font": "~14.0.8",
     "expo-haptics": "~15.0.7",
@@ -47,5 +48,8 @@
     "eslint-config-expo": "~10.0.0",
     "typescript": "~5.9.2"
   },
-  "private": true
+  "private": true,
+  "overrides": {
+    "brace-expansion": "^2.1.4"
+  }
 }

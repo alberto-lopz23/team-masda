@@ -1,6 +1,8 @@
 import { Ionicons } from "@expo/vector-icons"; // Iconos de Expo
-import React from "react";
+import { collection, getDocs } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
   Linking,
   StyleSheet,
@@ -8,8 +10,17 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { db } from "../firebaseConfig";
 
-const beneficios = [
+interface Beneficio {
+  id: string;
+  titulo: string;
+  descripcion: string;
+  ubi: string;
+}
+
+// Respaldos por si la colección `beneficios` no existe o está vacía
+const FALLBACK: Beneficio[] = [
   {
     id: "1",
     titulo: "baterias cometa",
@@ -31,6 +42,36 @@ const beneficios = [
 ];
 
 export default function MapaBeneficios() {
+  const [beneficios, setBeneficios] = useState<Beneficio[] | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const snap = await getDocs(collection(db, "beneficios"));
+        const list = snap.docs.map((d) => {
+          const data = d.data() as Partial<Beneficio>;
+          return { id: d.id, titulo: data?.titulo ?? "Sin título", descripcion: data?.descripcion ?? "", ubi: data?.ubi ?? "" } as Beneficio;
+        });
+        if (active) setBeneficios(list.length > 0 ? list : FALLBACK);
+      } catch (e) {
+        console.error("Error cargando beneficios:", e);
+        if (active) setBeneficios(FALLBACK);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (beneficios === null) {
+    return (
+      <View style={[styles.container, styles.center]}>
+        <ActivityIndicator size="large" color="#FF6F91" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -58,6 +99,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#111", // negro de fondo
     padding: 15,
+  },
+  center: {
+    justifyContent: "center",
+    alignItems: "center",
   },
   card: {
     borderWidth: 1,

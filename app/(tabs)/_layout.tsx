@@ -1,32 +1,27 @@
 import { Slot, useRouter } from "expo-router";
+import { onAuthStateChanged } from "firebase/auth";
 import React, { useEffect, useState } from "react";
 import { View, ActivityIndicator } from "react-native";
+import { auth } from "../../firebaseConfig";
 
 export default function TabsLayout() {
   const router = useRouter();
   const [autenticado, setAutenticado] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Simulación de verificación de sesión (puedes cambiar por tu lógica real)
-    const verificarSesion = async () => {
-      // Por ejemplo, podrías leer de AsyncStorage aquí
-      // const usuario = await AsyncStorage.getItem("usuario");
-      // setAutenticado(!!usuario);
-
-      // Simulación: no autenticado por defecto
-      setAutenticado(false);
-    };
-    verificarSesion();
+    const unsub = onAuthStateChanged(auth, (user) => {
+      setAutenticado(!!user);
+    });
+    return unsub;
   }, []);
 
   useEffect(() => {
-    if (autenticado === false) {
-      router.replace("/welcome"); // Redirige si no está autenticado
+    if (autenticado !== null) {
+      router.replace(autenticado ? "/home" : "/welcome");
     }
-  }, [autenticado]);
+  }, [autenticado, router]);
 
   if (autenticado === null) {
-    // Mientras verifica la sesión, muestra un loader
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color="#FF6F91" />

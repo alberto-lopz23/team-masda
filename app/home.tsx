@@ -1,8 +1,9 @@
 import { Entypo } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import {
   addDoc,
   collection,
@@ -39,14 +40,44 @@ export default function MembershipCard() {
   const [markLocalId, setMarkLocalId] = useState("");
   const [markingDisabled, setMarkingDisabled] = useState(false);
   const [fotoPerfil, setFotoPerfil] = useState<string | null>(null);
+  const [qrVisible, setQrVisible] = useState(false);
+  const [scanned, setScanned] = useState(false);
+  const [permission, requestPermission] = useCameraPermissions();
   const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      await AsyncStorage.removeItem("fotoPerfil");
+      setFotoPerfil(null);
+      router.replace("/welcome");
+    } catch (e) {
+      console.error("Error cerrando sesión:", e);
+      Alert.alert("Error", "No se pudo cerrar sesión.");
+    }
+  };
+
+  const openScanner = async () => {
+    setMenuVisible(false);
+    if (!permission?.granted) {
+      const res = await requestPermission();
+      if (!res.granted) {
+        return Alert.alert(
+          "Permiso requerido",
+          "Necesitas permitir el acceso a la cámara para escanear códigos QR."
+        );
+      }
+    }
+    setScanned(false);
+    setQrVisible(true);
+  };
 
   useEffect(() => {
     const cargarFoto = async () => {
       try {
         const foto = await AsyncStorage.getItem("fotoPerfil");
         if (foto) setFotoPerfil(foto);
-      } catch (e) {
+      } catch {
         setFotoPerfil(null);
       }
     };
@@ -222,14 +253,53 @@ export default function MembershipCard() {
             />
             <Button
               title="QR"
-              onPress={() => {
-                /* acción de QR */
-              }}
+              onPress={openScanner}
               style={styles.menuItem}
+              textStyle={styles.menuText}
+            />
+            <Button
+              title="Cerrar sesión"
+              onPress={handleLogout}
+              style={[styles.menuItem, { borderBottomWidth: 0 }]}
               textStyle={styles.menuText}
             />
           </View>
         </Pressable>
+      </Modal>
+
+      <Modal
+        visible={qrVisible}
+        transparent={false}
+        animationType="fade"
+        onRequestClose={() => setQrVisible(false)}
+      >
+        <View style={styles.scannerContainer}>
+          <Text style={styles.scannerTitle}>
+            Escanea el QR del local
+          </Text>
+          <CameraView
+            style={styles.scanner}
+            facing="back"
+            barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
+            onBarcodeScanned={
+              scanned
+                ? undefined
+                : ({ data }) => {
+                    if (!data) return;
+                    setScanned(true);
+                    setQrVisible(false);
+                    setMarkLocalId(String(data).trim());
+                    setMarkModalVisible(true);
+                  }
+            }
+          />
+          <TouchableOpacity
+            style={styles.scannerCancel}
+            onPress={() => setQrVisible(false)}
+          >
+            <Text style={styles.scannerCancelText}>Cancelar</Text>
+          </TouchableOpacity>
+        </View>
       </Modal>
 
       <Modal
@@ -461,5 +531,35 @@ const styles = StyleSheet.create({
   menuText: {
     color: "#fff",
     fontSize: 16,
+  },
+  scannerContainer: {
+    flex: 1,
+    backgroundColor: "#000",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  scannerTitle: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 16,
+  },
+  scanner: {
+    width: "90%",
+    aspectRatio: 1,
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  scannerCancel: {
+    marginTop: 20,
+    backgroundColor: "#333",
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 8,
+  },
+  scannerCancelText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });

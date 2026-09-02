@@ -52,6 +52,7 @@ export default function BusinessScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const localId = params.id ? String(params.id) : "";
+  const localNombre = params.nombre ? String(params.nombre) : "";
   const localProfilePic = "https://ui-avatars.com/api/?name=Local";
 
   // 🔹 Cargar todos los usuarios
@@ -152,7 +153,11 @@ export default function BusinessScreen() {
     <View style={styles.container}>
       {/* Header con foto */}
       <View style={styles.header}>
-        <View style={{ flex: 1 }} />
+        <View style={{ flex: 1 }}>
+          {localNombre ? (
+            <Text style={styles.localNombre}>{localNombre}</Text>
+          ) : null}
+        </View>
         <TouchableOpacity
           onPress={() =>
             router.push({ pathname: "/perfil-local", params: { id: localId } })
@@ -442,6 +447,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginTop: 10,
   },
+  localNombre: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
   profilePic: {
     width: 44,
     height: 44,
@@ -449,27 +459,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#e53935",
     marginRight: 8,
-  },
-  countsInlineRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 8,
-  },
-  countBox: {
-    backgroundColor: "rgba(255,255,255,0.04)",
-    padding: 8,
-    borderRadius: 8,
-    alignItems: "center",
-    minWidth: 68,
-  },
-  countNumberLarge: {
-    color: "#FFD700",
-    fontWeight: "700",
-    fontSize: 18,
-  },
-  countLabelSmall: {
-    color: "#fff",
-    fontSize: 12,
   },
   title: {
     color: "#fff",
@@ -560,10 +549,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "600",
     marginBottom: 10,
-  },
-  active: {
-    color: "#fff",
-    fontWeight: "bold",
   },
   plan: {
     fontSize: 22,

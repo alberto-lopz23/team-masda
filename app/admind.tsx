@@ -1,3 +1,4 @@
+import { signOut } from "firebase/auth";
 import {
   collection,
   doc,
@@ -16,7 +17,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { db } from "../firebaseConfig";
+import { auth, db } from "../firebaseConfig";
 
 export default function AdmindScreen() {
   const [activeTab, setActiveTab] = useState<"locales" | "usuarios">("locales");
@@ -31,6 +32,19 @@ export default function AdmindScreen() {
   const [planModalTitle, setPlanModalTitle] = useState<string>("Subir plan");
   const [expandedLocal, setExpandedLocal] = useState<string | null>(null);
   const [localVisits, setLocalVisits] = useState<Record<string, any>>({});
+  const [adminUid, setAdminUid] = useState<string | null>(null);
+
+  useEffect(() => {
+    setAdminUid(auth.currentUser?.uid ?? null);
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.error("Error cerrando sesión del admin:", e);
+    }
+  };
 
   // Persistir activación en Firestore (batch)
   const activateSelected = async () => {
@@ -233,17 +247,19 @@ export default function AdmindScreen() {
 
       const batch = writeBatch(db);
       const planUpdates: { id: string; plan: string }[] = [];
+      const planKey =
+        typeof optionKey === "string" ? optionKey.toLowerCase() : optionKey;
+      const newPlanValue =
+        planKey === "basico"
+          ? "BASICO"
+          : planKey === "premium"
+          ? "PREMIUM"
+          : planKey === "elite"
+          ? "ELITE"
+          : optionKey;
+
       existing.forEach((id) => {
         const ref = doc(db, "usuarios", id);
-        const newPlanValue =
-          optionKey === "BASICO"
-            ? "BASICO"
-            : optionKey === "PREMIUM"
-            ? "PREMIUM"
-            : optionKey === "ELITE"
-            ? "ELITE"
-            : optionKey;
-
         if (typeof newPlanValue !== "undefined") {
           // usar update para cambiar solo el campo 'plan' y no crear otros campos
           batch.update(ref, { plan: newPlanValue });
@@ -261,7 +277,7 @@ export default function AdmindScreen() {
           existing.includes(String(u.id))
             ? {
                 ...u,
-                plan: optionKey,
+                plan: newPlanValue,
               }
             : u
         )
@@ -391,7 +407,7 @@ export default function AdmindScreen() {
           ...prev,
           [l.id]: { diarios, mensuales, visitors },
         }));
-      } catch (e) {
+      } catch {
         setLocalVisits((prev) => ({
           ...prev,
           [l.id]: { diarios: 0, mensuales: 0, visitors: [] },
@@ -410,7 +426,12 @@ export default function AdmindScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Admin</Text>
+      <View style={styles.titleRow}>
+        <Text style={styles.title}>Admin</Text>
+        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+          <Text style={styles.logoutText}>Cerrar sesión</Text>
+        </TouchableOpacity>
+      </View>
     
       <View style={styles.tabRow}>
         <TouchableOpacity
@@ -469,8 +490,7 @@ export default function AdmindScreen() {
                         <View style={{ marginTop: 8 }}>
                           {visitsData.visitors
                             .filter(
-                              (v: any) =>
-                                String(v.nombre ?? "").toLowerCase() !== "roddy"
+                              (v: any) => v.userDocId !== adminUid
                             )
                             .map((v: any) => (
                               <View
@@ -517,14 +537,7 @@ export default function AdmindScreen() {
       ) : (
         <ScrollView style={{ width: "100%" }}>
           {usuarios
-            .filter((u) => {
-              const name = String(u.nombre ?? "")
-                .toLowerCase()
-                .trim();
-              // Excluir exactamente al admin 'Roddy Ramires' (case-insensitive)
-              if (name === "roddy ramires") return false;
-              return true;
-            })
+            .filter((u) => u.docId !== adminUid)
             .map((u) => (
               <View key={u.docId ?? u.id} style={styles.card}>
                 <View style={styles.cardHeader}>
@@ -661,7 +674,23 @@ const styles = StyleSheet.create({
     color: "#e53935",
     fontSize: 24,
     fontWeight: "bold",
+  },
+  titleRow: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 12,
+  },
+  logoutBtn: {
+    backgroundColor: "#1f2937",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  logoutText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
   tabRow: {
     flexDirection: "row",
@@ -772,12 +801,6 @@ const styles = StyleSheet.create({
   smallBadgeText: {
     color: "#fff",
     fontWeight: "700",
-  },
-  badgeVisited: {
-    backgroundColor: "#16a34a",
-  },
-  badgeNotVisited: {
-    backgroundColor: "#6b7280",
   },
   statusRow: {
     marginLeft: 8,
